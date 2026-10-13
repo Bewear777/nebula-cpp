@@ -6,8 +6,10 @@
 #include "nebula/client/ConnectionPool.h"
 
 #include <folly/String.h>
+#include <glog/logging.h>
 
 #include <atomic>
+#include <exception>
 
 namespace nebula {
 
@@ -23,7 +25,12 @@ void ConnectionPool::init(const std::vector<std::string> &addresses, const Confi
       // ignore error
       continue;
     }
-    address_.emplace_back(std::make_pair(splits[0], folly::to<int32_t>(splits[1])));
+    try {
+      auto port = folly::to<int32_t>(splits[1]);
+      address_.emplace_back(std::make_pair(splits[0], port));
+    } catch (const std::exception &ex) {
+      LOG(ERROR) << "addr has some error: " << ex.what();
+    }
   }
   if (address_.empty()) {
     // no valid address
