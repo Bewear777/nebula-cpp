@@ -46,6 +46,9 @@ Session ConnectionPool::getSession(const std::string &username,
   Connection conn = getConnection();
   auto resp = conn.authenticate(username, password);
   if (resp.errorCode != ErrorCode::SUCCEEDED || resp.sessionId == nullptr) {
+    if (conn.isOpen()) {
+      giveBack(std::move(conn));
+    }
     return Session();
   }
   return Session(*resp.sessionId,
