@@ -92,10 +92,6 @@ void ConnectionPool::giveBack(Connection &&conn) {
 void ConnectionPool::newConnection(std::size_t cursor, std::size_t count) {
   for (std::size_t connectionCount = 0, addrCursor = cursor, loopCount = 0; connectionCount < count;
        ++addrCursor, ++loopCount) {
-    if (loopCount >= maxConnPerNode_) {
-      LOG(ERROR) << "The pool size  will be set to maxConnPerNode: " << maxConnPerNode_;
-      return;
-    }
     if (loopCount > count * address_.size()) {
       // Can't get so many connections, return to avoid dead loop
       return;

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -53,7 +52,6 @@ class ConnectionPool {
 
   mutable std::mutex lock_;
   std::list<Connection> conns_;
-  std::uint32_t maxConnPerNode_{5000};
 };
 
 }  // namespace nebula
