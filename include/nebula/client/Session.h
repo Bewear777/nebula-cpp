@@ -52,6 +52,14 @@ class Session {
     session.offsetSecs_ = 0;
   }
   void operator=(Session &&session) {
+    if (this == &session) {
+      return;
+    }
+    release();
+    conn_ = std::move(session.conn_);
+    pool_ = session.pool_;
+    retryConnect_ = session.retryConnect_;
+    connectionIsBroken_.store(session.connectionIsBroken_.exchange(false));
     sessionId_ = session.sessionId_;
     username_ = std::move(session.username_);
     password_ = std::move(session.password_);
@@ -126,7 +134,7 @@ class Session {
   std::string password_;
   // empty means not a named timezone
   std::string timezoneName_;
-  int32_t offsetSecs_;
+  int32_t offsetSecs_{0};
   bool retryConnect_{true};
   std::atomic<bool> connectionIsBroken_{false};
 };
