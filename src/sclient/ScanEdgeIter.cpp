@@ -35,7 +35,7 @@ std::pair<::nebula::ErrorCode, DataSet> ScanEdgeIter::next() {
     this->hasNext_ = false;
     return {code, DataSet()};
   }
-  auto scanResponse = r.second;
+  auto& scanResponse = r.second;
   DCHECK(scanResponse.get_result().get_failed_parts().empty());
   auto partCursorMapResp = scanResponse.get_cursors();
   DCHECK_EQ(partCursorMapResp.size(), 1);
@@ -45,7 +45,7 @@ std::pair<::nebula::ErrorCode, DataSet> ScanEdgeIter::next() {
     nextCursor_ = scanCursor.next_cursor_ref().value();
   }
 
-  return {::nebula::ErrorCode::SUCCEEDED, *scanResponse.get_props()};
+  return {::nebula::ErrorCode::SUCCEEDED, std::move(*scanResponse.get_props())};
 }
 
 }  //  namespace nebula
