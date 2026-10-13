@@ -6,8 +6,10 @@
 #include "nebula/client/ConnectionPool.h"
 
 #include <folly/String.h>
+#include <glog/logging.h>
 
 #include <atomic>
+#include <exception>
 
 namespace nebula {
 
@@ -23,7 +25,12 @@ void ConnectionPool::init(const std::vector<std::string> &addresses, const Confi
       // ignore error
       continue;
     }
-    address_.emplace_back(std::make_pair(splits[0], folly::to<int32_t>(splits[1])));
+    try {
+      auto port = folly::to<int32_t>(splits[1]);
+      address_.emplace_back(std::make_pair(splits[0], port));
+    } catch (const std::exception &ex) {
+      LOG(ERROR) << "addr has some error: " << ex.what();
+    }
   }
   if (address_.empty()) {
     // no valid address
@@ -85,6 +92,10 @@ void ConnectionPool::giveBack(Connection &&conn) {
 void ConnectionPool::newConnection(std::size_t cursor, std::size_t count) {
   for (std::size_t connectionCount = 0, addrCursor = cursor, loopCount = 0; connectionCount < count;
        ++addrCursor, ++loopCount) {
+    if (loopCount >= maxConnPerNode_) {
+      LOG(ERROR) << "The pool size  will be set to maxConnPerNode: " << maxConnPerNode_;
+      return;
+    }
     if (loopCount > count * address_.size()) {
       // Can't get so many connections, return to avoid dead loop
       return;
