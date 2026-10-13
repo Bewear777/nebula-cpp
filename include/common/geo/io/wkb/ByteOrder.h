@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace nebula {
 namespace geo {
 
